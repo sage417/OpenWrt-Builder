@@ -5,7 +5,7 @@
 async function fetchRepo() {
     const siteUrl = window.location.href;
     if (siteUrl.includes('127.0.0.1')) return { owner: 'AzimsTech', repo: 'OpenWrt-Builder' };
-
+    if (siteUrl.includes('pooi.app')) return { owner: 'sage417', repo: 'OpenWrt-Builder' };
     const urlParts = siteUrl.split('/');
     const owner = urlParts[2].split('.')[0];
     const repo = urlParts[3] || '';
