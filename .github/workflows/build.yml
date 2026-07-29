@@ -153,9 +153,26 @@ jobs:
         continue-on-error: true
         run: |
           tar xf openwrt-imagebuilder-*.tar.* --strip=1 --no-same-owner -C .
+          mkdir -p ./packages
+          ALL_PACKAGES="${{ env.packages }} ${{ env.device_packages }}"
+
+          echo "Fetch OpenClash latest release API..."
+          curl -L --retry 2 https://api.github.com/repos/vernesong/OpenClash/releases/latest -o /tmp/openclash_version.json
+          if [ -f "/tmp/openclash_version.json" ]; then
+            download_url=$(jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' /tmp/openclash_version.json)
+            if [ -z "$download_url" ]; then
+                echo "openclash download url is empty"
+            else
+              if curl -L --retry 2 "$download_url" -O --output-dir ./packages; then
+                clash_packages="-dnsmasq dnsmasq-full -ip-tiny ip-full ruby ruby-yaml luci-app-openclash"
+                ALL_PACKAGES+=" $clash_packages"
+              fi
+            fi
+          fi
+           
           make image \
             PROFILE="${{ env.profile }}" \
-            PACKAGES="${{ env.packages }} ${{ env.device_packages }}" \
+            PACKAGES="$ALL_PACKAGES" \
             FILES="${{ env.files }}" \
             DISABLED_SERVICES="${{ env.disabled_services }}"
 
