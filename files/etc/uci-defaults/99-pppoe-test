@@ -159,6 +159,27 @@ EOF
 
 /etc/init.d/cron reload
 
+# create LED startup check
+
+cat >> /etc/init.d/led-check << 'EOF'
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start() {
+        hour=$(date +%-H)
+        if [ "$hour" -ge 23 ] || [ "$hour" -lt 7 ]; then
+                echo 0 > /sys/class/leds/blue:status/brightness
+        else
+                echo 1 > /sys/class/leds/blue:status/brightness
+        fi
+}
+EOF
+
+chmod +x /etc/init.d/led-check
+/etc/init.d/led-check enable
+/etc/init.d/led-check start
+
 # silence the apk cheatsheet below the banner
 touch /etc/profile.d/apk-cheatsheet.hush
 
