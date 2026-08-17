@@ -57,14 +57,14 @@ uci set network.wan.ipv6='1'
 uci set network.wan.peerdns='0'
 
 uci -q delete network.wan.dns
-uci add_list network.wan.dns="1.1.1.2"
-uci add_list network.wan.dns="1.0.0.2"
+uci add_list network.wan.dns="1.1.1.1"
+uci add_list network.wan.dns="8.8.8.8"
 uci set network.wan.peerdns='0'
 
 uci set network.wan6.device='@wan'
 uci -q delete network.wan6.dns
-uci add_list network.wan6.dns="2606:4700:4700::1112"
-uci add_list network.wan6.dns="2606:4700:4700::1002"
+uci add_list network.wan6.dns="2606:4700:4700::1111"
+uci add_list network.wan6.dns="2001:4860:4860::8888"
 uci set network.wan6.peerdns='0'
 
 uci set network.wan.multipath='off'
@@ -149,8 +149,38 @@ cat >> /etc/crontabs/root << 'EOF'
 
 # improve stability
 00 19 * * * sync && echo 3 > /proc/sys/vm/drop_caches
+
+# Turn off blue LED at 11:00 PM every day 
+0 23 * * * echo 0 > /sys/class/leds/blue:status/brightness 
+
+# Turn on blue LED at 7:00 AM every day 
+0 7 * * * echo 1 > /sys/class/leds/blue:status/brightness
 EOF
 
 /etc/init.d/cron reload
+
+# create LED startup check
+
+cat >> /etc/init.d/led-check << 'EOF'
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start() {
+        hour=$(date +%-H)
+        if [ "$hour" -ge 23 ] || [ "$hour" -lt 7 ]; then
+                echo 0 > /sys/class/leds/blue:status/brightness
+        else
+                echo 1 > /sys/class/leds/blue:status/brightness
+        fi
+}
+EOF
+
+chmod +x /etc/init.d/led-check
+/etc/init.d/led-check enable
+/etc/init.d/led-check start
+
+# silence the apk cheatsheet below the banner
+touch /etc/profile.d/apk-cheatsheet.hush
 
 echo "All done!"

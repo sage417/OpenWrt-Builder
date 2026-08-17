@@ -82,7 +82,7 @@ for band in $band2g $band5g; do
     uci set wireless.@wifi-iface[$band].mode='sta'
     uci set wireless.@wifi-iface[$band].disabled='0'
     uci set wireless.@wifi-iface[$band].ssid="${ssid}-5G@unifi"
-    uci set wireless.@wifi-iface[$band].encryption='psk2+aes'
+    uci set wireless.@wifi-iface[$band].encryption='psk2'
     uci set wireless.@wifi-iface[$band].key="$ssid_key"
     uci set wireless.@wifi-iface[$band].wpa_group_rekey='86400'
 
@@ -100,6 +100,9 @@ mkdir -p /etc/owut.d/
 SCRIPT=$(echo /rom/etc/uci-defaults/99-*)
 cp "$SCRIPT" /etc/owut.d/
 uci set "attendedsysupgrade.owut.init_script=/etc/owut.d/${SCRIPT##*/}"
+
+# silence the apk cheatsheet below the banner
+touch /etc/profile.d/apk-cheatsheet.hush
 
 uci commit
 echo "All done!" 
