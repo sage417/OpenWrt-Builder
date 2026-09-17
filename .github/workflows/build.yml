@@ -149,13 +149,34 @@ jobs:
           TARGET=${{ env.target }} \
           VERSION_PATH=${version_path} ./setup.sh
 
+      - name: Prepare OpenClash package
+        run: |
+          CLASH_PACKAGES=""
+          mkdir -p ./packages
+          echo "Fetch OpenClash latest release info..."
+          curl -L --retry 2 https://api.github.com/repos/vernesong/OpenClash/releases/latest -o /tmp/openclash_version.json
+          if [ -f "/tmp/openclash_version.json" ]; then
+            download_url=$(jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' /tmp/openclash_version.json)
+            if [ -z "$download_url" ] || [ "$download_url" = "null" ]; then
+                echo "openclash download url is empty"
+            else
+              if curl -L --retry 2 "$download_url" -O --output-dir ./packages; then
+                echo "OpenClash package downloaded successfully."
+                CLASH_PACKAGES="-dnsmasq dnsmasq-full -ip-tiny ip-full ruby ruby-yaml luci-app-openclash"
+              else
+                echo "Failed to download OpenClash package."
+              fi
+            fi
+          fi
+          echo "CLASH_PACKAGES=${CLASH_PACKAGES}" >> $GITHUB_ENV
+
       - name: Build OpenWrt image
         continue-on-error: true
         run: |
           tar xf openwrt-imagebuilder-*.tar.* --strip=1 --no-same-owner -C .
           make image \
             PROFILE="${{ env.profile }}" \
-            PACKAGES="${{ env.packages }} ${{ env.device_packages }}" \
+            PACKAGES="${{ env.packages }} ${{ env.CLASH_PACKAGES }} ${{ env.device_packages }}" \
             FILES="${{ env.files }}" \
             DISABLED_SERVICES="${{ env.disabled_services }}"
 
