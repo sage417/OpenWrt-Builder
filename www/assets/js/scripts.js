@@ -578,7 +578,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initCustomCombobox("modelInput");
 
     const { owner, repo } = await fetchRepo();
-    document.getElementById("repoUrl").href = `https://github.com/${owner}/${repo}/tree/main/files/etc/uci-defaults`;
+    document.getElementById("repoUrl").href = `https://github.com/${owner}/${repo}/tree/main_pooi.app/files/etc/uci-defaults`;
 
     // 2. Fetch independent dropdown data first (Versions and Scripts)
     const versionsPromise = fetchOpenWrtVersions();
@@ -701,7 +701,7 @@ async function runWorkflow(event) {
     const triggerRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/build.yml/dispatches`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github+json", "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: "main", inputs })
+        body: JSON.stringify({ ref: "main_pooi.app", inputs })
     });
 
     if (!triggerRes.ok) return alert("Failed to trigger workflow. Check console.");
@@ -774,7 +774,7 @@ async function openScriptEditor() {
 
         const { owner, repo } = await fetchRepo();
         try {
-            const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/files/etc/uci-defaults/${scriptName}`;
+            const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main_pooi.app/files/etc/uci-defaults/${scriptName}`;
             const response = await fetch(rawUrl, { headers });
             if (response.status === 304 && cached) {
                 content = JSON.parse(cached).data;
@@ -925,5 +925,5 @@ document.getElementById("editorScriptName").addEventListener("click", async func
     const script = this.dataset.script;
     if (!script) return;
     const { owner, repo } = await fetchRepo();
-    window.open(`https://github.com/${owner}/${repo}/blob/main/files/etc/uci-defaults/${script}`, "_blank");
+    window.open(`https://github.com/${owner}/${repo}/blob/main_pooi.app/files/etc/uci-defaults/${script}`, "_blank");
 });
