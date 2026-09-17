@@ -75,7 +75,7 @@ async function fetchAvailableScripts(owner, repo) {
         if (etag) headers["If-None-Match"] = etag;
     }
 
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/files/etc/uci-defaults?ref=main`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/files/etc/uci-defaults?ref=main_pooi.app`;
     const response = await fetch(apiUrl, { headers });
     if (response.status === 304 && cached) {
         return JSON.parse(cached).data;
